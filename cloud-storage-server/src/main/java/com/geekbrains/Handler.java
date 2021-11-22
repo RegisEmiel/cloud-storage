@@ -111,10 +111,10 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
 
     private void saveFilePart(Message message) {
         //FilePart msg = (FilePart) message;
-        NextFilePart msg = (NextFilePart) message;
+        FilePartMessage msg = (FilePartMessage) message;
         Path savePath = Paths.get(currentDir.toString(), msg.getFileName());
         int part = msg.getPart();
-        int allParts = msg.getAllParts();
+        int allParts = msg.getTotal();
         long startByte = msg.getStartByte();
         int lastPart = msg.getLastPartSize();
 
@@ -123,7 +123,7 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
                 return;
             }
 
-            sc.writeAndFlush(new NextFilePartToClient(msg.getFileName(), allParts, part, startByte, lastPart));
+            //sc.writeAndFlush(new NextFilePartToClient(msg.getFileName(), allParts, part, startByte, lastPart));
         }
     }
 

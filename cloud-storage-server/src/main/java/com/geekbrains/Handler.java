@@ -6,7 +6,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 
 import io.netty.channel.socket.SocketChannel;
-//import lombok.SneakyThrows;
+import lombok.SneakyThrows;
 
 
 import java.io.IOException;
@@ -74,21 +74,21 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
         }
     }
 
-    //@SneakyThrows
+    @SneakyThrows
     private void createDir(Message message) {
         CreateDirectoryMessage msg = (CreateDirectoryMessage) message;
         Path createDirPath = Paths.get(currentDir.toAbsolutePath().toString(), msg.getDirName());
         Files.createDirectory(createDirPath);
     }
 
-    //@SneakyThrows
+    @SneakyThrows
     private void deleteFile(Message message) {
         DeleteMessage msg = (DeleteMessage) message;
         Path deletePath = Paths.get(currentDir.toAbsolutePath().toString(),msg.getFileName());
         Files.delete(deletePath);
     }
 
-    //@SneakyThrows
+    @SneakyThrows
     private void listFolder(Message msg) {
         register.cancel();
         FolderMessage fr = (FolderMessage) msg;
@@ -103,7 +103,7 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
 
 
 
-    private void sendNextPart(Message message) {
+    private void sendNextPart(Message message) throws IOException {
         NextPartUploadMessage msg = (NextPartUploadMessage) message;
         Path path = Paths.get(currentDir.toString(), msg.getFileName());
         sc.writeAndFlush(fileUtilities.sendNextPart(msg, path));
@@ -118,16 +118,20 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
         long startByte = msg.getStartByte();
         int lastPart = msg.getLastPartSize();
 
-        if (fileUtilities.savePart(savePath, msg.getData())) {
-            if (part == allParts) {
-                return;
-            }
+        try {
+            if (fileUtilities.savePart(savePath, msg.getData())) {
+                if (part == allParts) {
+                    return;
+                }
 
-            //sc.writeAndFlush(new NextFilePartToClient(msg.getFileName(), allParts, part, startByte, lastPart));
+                //sc.writeAndFlush(new NextFilePartToClient(msg.getFileName(), allParts, part, startByte, lastPart));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private void sendFile(Message message) {
+    private void sendFile(Message message) throws IOException {
         SendingFileMessage msg = (SendingFileMessage) message;
         Path savePath = Paths.get(currentDir.toString(), msg.getFileName());
         if (Files.exists(savePath)) {

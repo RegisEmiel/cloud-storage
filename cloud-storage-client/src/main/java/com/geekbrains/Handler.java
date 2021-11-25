@@ -66,7 +66,7 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
         if (mainController.getNetwork().getFileUtils().savePart(savePath, msg.getData())) {
             if (part == allParts) {
                 // TODO
-                // Обновить список вайлов
+                // Обновить список файлов
                 return;
             }
             sc.writeAndFlush(new NextPartToServerMessages(msg.getFileName(), allParts, part, startByte, lastPart));

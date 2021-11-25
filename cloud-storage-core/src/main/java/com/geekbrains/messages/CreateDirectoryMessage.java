@@ -1,4 +1,4 @@
-package com.geekbrains.filehandlers;
+package com.geekbrains.messages;
 
 public class CreateDirectoryMessage  implements Message{
     private String dirName;

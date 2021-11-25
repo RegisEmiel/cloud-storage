@@ -1,6 +1,6 @@
-package com.geekbrains.filehandlers;
+package com.geekbrains.messages;
 
-public class SendingFileMessage implements Message{
+public class AcceptCompleteFileMessage implements Message{
     private String fileName;
     private byte[] data;
 
@@ -12,13 +12,13 @@ public class SendingFileMessage implements Message{
         return data;
     }
 
-    public SendingFileMessage(String fileName, byte[] data) {
+    public AcceptCompleteFileMessage(String fileName, byte[] data) {
         this.fileName = fileName;
         this.data = data;
     }
 
     @Override
     public TypeMessage getType() {
-        return TypeMessage.SENDING_FILE;
+        return TypeMessage.ACCEPT_COMPLETE_FILE;
     }
 }

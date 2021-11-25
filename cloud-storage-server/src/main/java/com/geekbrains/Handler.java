@@ -1,6 +1,8 @@
 package com.geekbrains;
 
-import com.geekbrains.filehandlers.*;
+import com.geekbrains.messages.*;
+import com.geekbrains.utilities.FileDescriptions;
+import com.geekbrains.utilities.FileUtilities;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -53,16 +55,16 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
             case CREATE_DIRECTORY:
                 createDir(msg);
                 break;
-            case SENDING_FILE:
-                saveFullFile(msg);
+            case ACCEPT_COMPLETE_FILE:
+                acceptCompleteFile(msg);
                 break;
-            case SEND_FILE:
+            case SEND_FILE_TO_CLIENT:
                 sendFile(msg);
                 break;
-            case FILE_PART:
-                saveFilePart(msg);
+            case ACCEPT_FILE_PART:
+                acceptFilePart(msg);
                 break;
-            case NEXT_PART_UPLOAD:
+            case NEXT_PART_TO_SERVER:
                 sendNextPart(msg);
                 break;
             case FOLDER:
@@ -104,12 +106,12 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
 
 
     private void sendNextPart(Message message) throws IOException {
-        NextPartUploadMessage msg = (NextPartUploadMessage) message;
+        NextPartToServerMessages msg = (NextPartToServerMessages) message;
         Path path = Paths.get(currentDir.toString(), msg.getFileName());
         sc.writeAndFlush(fileUtilities.sendNextPart(msg, path));
     }
 
-    private void saveFilePart(Message message) {
+    private void acceptFilePart(Message message) {
         //FilePart msg = (FilePart) message;
         FilePartMessage msg = (FilePartMessage) message;
         Path savePath = Paths.get(currentDir.toString(), msg.getFileName());
@@ -124,7 +126,7 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
                     return;
                 }
 
-                //sc.writeAndFlush(new NextFilePartToClient(msg.getFileName(), allParts, part, startByte, lastPart));
+                sc.writeAndFlush(new NextFilePartToClientMessages(msg.getFileName(), allParts, part, startByte, lastPart));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -132,15 +134,15 @@ public class Handler extends SimpleChannelInboundHandler<Message> {
     }
 
     private void sendFile(Message message) throws IOException {
-        SendingFileMessage msg = (SendingFileMessage) message;
+        SendFileMessage msg = (SendFileMessage) message;
         Path savePath = Paths.get(currentDir.toString(), msg.getFileName());
         if (Files.exists(savePath)) {
             fileUtilities.sendFile(savePath, sc);
         }
     }
 
-    private void saveFullFile(Message message) throws IOException {
-        SendingFileMessage msg = (SendingFileMessage) message;
+    private void acceptCompleteFile(Message message) throws IOException {
+        AcceptCompleteFileMessage msg = (AcceptCompleteFileMessage) message;
         Path savePath = Paths.get(currentDir.toString(), msg.getFileName());
         fileUtilities.saveFile(savePath, msg.getData());
     }

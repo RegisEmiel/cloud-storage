@@ -1,5 +1,7 @@
-package com.geekbrains.filehandlers;
+package com.geekbrains.utilities;
 
+import com.geekbrains.messages.FilePartMessage;
+import com.geekbrains.messages.AcceptCompleteFileMessage;
 import io.netty.channel.socket.SocketChannel;
 
 
@@ -9,20 +11,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FileUtilities {
-    static int iq = 0;
-    public final long SIZE_LIMIT = 8 * 1024 * 1024; // Передаем по 8 Мб
     private static FileUtilities fileUtilities;
 
+    public final long SIZE_LIMIT = 8 * 1024 * 1024; // Передаем по 8 Мб
+
+    static int partIndex = 0;
 
     public static FileUtilities getInstance() {
         if (fileUtilities == null) {
             fileUtilities = new FileUtilities();
+
             return fileUtilities;
         }
+
         return fileUtilities;
     }
 
@@ -30,18 +36,19 @@ public class FileUtilities {
         if (Files.size(path) > SIZE_LIMIT) {
             sendFileInParts(path, sc);
         } else {
-            sc.writeAndFlush(new SendingFileMessage(path.getFileName().toString(), Files.readAllBytes(path)));
+            sc.writeAndFlush(new AcceptCompleteFileMessage(path.getFileName().toString(), Files.readAllBytes(path)));
         }
     }
-
 
     public void saveFile(Path path, byte[] data) throws IOException {
         Files.write(path, data, StandardOpenOption.CREATE);
     }
 
+    @SneakyThrows
     public boolean savePart(Path path, byte[] data) throws IOException {
         Files.write(path, data, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-        log.debug("save {}", iq++);
+        log.debug("save {}", partIndex++);
+
         return true;
     }
 
@@ -60,12 +67,14 @@ public class FileUtilities {
         raf.seek(startByte);
         raf.read(buf);
         raf.close();
+
         return buf;
     }
 
     public FilePartMessage sendNextPart(FilePartMessage msg, Path path) throws IOException {
         int currentPart = msg.getPart() + 1;
         long currentStartByte = msg.getStartByte() + SIZE_LIMIT;
+
         if (currentPart==msg.getTotal()){
             byte[] lastPart = readBytes(path, currentStartByte, msg.getLastPartSize());
             return new FilePartMessage(msg.getFileName(),msg.getTotal(), currentPart,currentStartByte,msg.getLastPartSize(), lastPart);

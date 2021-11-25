@@ -1,7 +1,11 @@
-package com.geekbrains.filehandlers;
+package com.geekbrains.messages;
 
 public class SendFileMessage implements Message{
     private String fileName;
+
+    public String getFileName() {
+        return fileName;
+    }
 
     public SendFileMessage(String fileName) {
         this.fileName = fileName;
@@ -9,6 +13,6 @@ public class SendFileMessage implements Message{
 
     @Override
     public TypeMessage getType() {
-        return TypeMessage.SEND_FILE;
+        return TypeMessage.SEND_FILE_TO_CLIENT;
     }
 }

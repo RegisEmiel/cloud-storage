@@ -1,12 +1,12 @@
-package com.geekbrains.filehandlers;
+package com.geekbrains.messages;
 
-public class PartFileMessage implements Message{
+public class FilePartMessage implements Message{
     private String fileName;
     private byte[] data;
     private int part;
     private long startByte;
     private int lastPartSize;
-    private int allParts;
+    private int total;
 
     public String getFileName() {
         return fileName;
@@ -28,29 +28,29 @@ public class PartFileMessage implements Message{
         return lastPartSize;
     }
 
-    public int getAllParts() {
-        return allParts;
+    public int getTotal() {
+        return total;
     }
 
-    public PartFileMessage(String fileName, int allParts, int currentPart, long startByte, int lastPart) {
+    public FilePartMessage(String fileName, int total, int currentPart, long startByte, int lastPart) {
         this.fileName = fileName;
-        this.allParts = allParts;
+        this.total = total;
         this.part = currentPart;
         this.startByte = startByte;
         this.lastPartSize = lastPart;
     }
 
-    public PartFileMessage(String fileName, int allParts, int currentPart, long startByte, int lastPart, byte[] data) {
+    public FilePartMessage(String fileName, int total, int currentPart, long startByte, int lastPart, byte[] data) {
         this.part = currentPart;
         this.startByte = startByte;
         this.lastPartSize = lastPart;
-        this.allParts = allParts;
+        this.total = total;
         this.fileName = fileName;
         this.data = data;
     }
 
     @Override
     public TypeMessage getType() {
-        return TypeMessage.FILE_PART;
+        return TypeMessage.ACCEPT_FILE_PART;
     }
 }

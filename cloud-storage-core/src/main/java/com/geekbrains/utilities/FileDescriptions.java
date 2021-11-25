@@ -1,4 +1,4 @@
-package com.geekbrains.filehandlers;
+package com.geekbrains.utilities;
 
 import java.io.IOException;
 import java.nio.file.Files;

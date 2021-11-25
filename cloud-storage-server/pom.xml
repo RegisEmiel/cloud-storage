@@ -11,4 +11,12 @@
 
     <artifactId>cloud-storage-server</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.geekbrains</groupId>
+            <artifactId>cloud-storage-core</artifactId>
+            <version>1</version>
+        </dependency>
+    </dependencies>
+
 </project>

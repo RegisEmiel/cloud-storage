@@ -1,4 +1,4 @@
-package com.geekbrains.filehandlers;
+package com.geekbrains.messages;
 
 import java.io.Serializable;
 

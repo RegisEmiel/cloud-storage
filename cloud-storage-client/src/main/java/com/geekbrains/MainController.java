@@ -6,6 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -27,8 +28,7 @@ public class MainController implements Initializable {
     public TextField input;
     private DataInputStream is;
     private DataOutputStream os;
-
-    private static byte[] buffer = new byte[1024];
+    private NetChanel netChanel;
 
     private String selectedFileName = "";
 
@@ -43,27 +43,27 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            clientDir = Paths.get("cloud-storage-november-client", "client");
+            // Создать клиентскую директорию, если отсутствует
+            clientDir = Paths.get("cloud-storage-client", "client");
             if (!Files.exists(clientDir)) {
                 Files.createDirectory(clientDir);
             }
 
+            // Сформировать список файлов в клиентской директории
             clientView.getItems().clear();
             clientView.getItems().addAll(getFiles(clientDir));
+
+            // Добавить обработчик выделения файла
             clientView.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2) {
+                if (event.getClickCount() == 1) {
                     String item = clientView.getSelectionModel().getSelectedItem();
                     input.setText(item);
                     setSelectedFileName(item);
                 }
             });
 
-            Socket socket = new Socket("localhost", 8189);
-            is = new DataInputStream(socket.getInputStream());
-            os = new DataOutputStream(socket.getOutputStream());
-            Thread readThread = new Thread(this::read);
-            readThread.setDaemon(true);
-            readThread.start();
+            netChanel = new NetChanel();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,45 +74,24 @@ public class MainController implements Initializable {
                 .collect(Collectors.toList());
     }
 
-    private void read() {
-        try {
-            while (true) {
-                String msg = is.readUTF();
-                log.debug("Received: {}", msg);
-                Platform.runLater(() -> serverView.getItems().add(msg));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public void sendMessage(ActionEvent actionEvent) throws IOException {
-//        String text = input.getText();
-//        os.writeUTF(text);
-//        os.flush();
-//        input.clear();
-        // TODO: 28.10.2021 Передать файл на сервер
-
         sendFile(getSelectedFileName());
     }
 
     private void sendFile(String fileName) throws IOException {
-        Path file = Paths.get(String.valueOf(clientDir), fileName);
-        long fileSize = Files.size(file);
-        int read = 0;
 
-        os.writeUTF(fileName);
-        os.writeLong(fileSize);
-
-        InputStream fileInputStream = Files.newInputStream(file);
-
-        while ((read = fileInputStream.read(buffer)) != -1)
-            os.write(buffer, 0, read);
-
-        os.flush();
     }
 
     public void sendFileAction(ActionEvent actionEvent) throws IOException {
         sendFile(getSelectedFileName());
+    }
+
+    public Path getClientDir() {
+        return clientDir;
+    }
+
+    public NetChanel getNetwork() {
+        return netChanel;
     }
 }

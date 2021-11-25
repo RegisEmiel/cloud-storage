@@ -1,4 +1,4 @@
-package com.geekbrains.filehandlers;
+package com.geekbrains.messages;
 
 public class FolderMessage implements Message{
     private String folderName;

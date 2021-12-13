@@ -5,18 +5,14 @@ import com.geekbrains.utilities.FileDescriptions;
 import com.geekbrains.utilities.FileUtilities;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-
 import io.netty.channel.socket.SocketChannel;
 import lombok.SneakyThrows;
-
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Handler extends SimpleChannelInboundHandler<Message> {
